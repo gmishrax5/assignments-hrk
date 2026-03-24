@@ -16,6 +16,38 @@ setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
 
+// app.use((req, res, next) => { 
+//   numberOfRequestsForUser[req.headers['user-id']] = (numberOfRequestsForUser[req.headers['user-id']] || 0) + 1;
+//   if (numberOfRequestsForUser[req.headers['user-id']] > 5) {
+//     return res.status(404).json({ error: 'Rate limit exceeded' });
+//   }
+//   next();
+// } );
+
+app.use((req, res, next) => { 
+
+  const userId = req.headers['user-id'];
+
+  if (numberOfRequestsForUser[userId]) {
+    numberOfRequestsForUser[userId] += 1;
+    if(numberOfRequestsForUser[userId] > 5) {
+
+      res.status(404).send("no entry")    }
+      else {
+        next();
+      } 
+  }else {
+    numberOfRequestsForUser[userId] = 1;
+    next();
+  }
+
+  numberOfRequestsForUser[req.headers['user-id']] = (numberOfRequestsForUser[req.headers['user-id']] || 0) + 1;
+  if (numberOfRequestsForUser[req.headers['user-id']] > 5) {
+    return res.status(404).json({ error: 'Rate limit exceeded' });
+  }
+  next();
+} );
+
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
 });
