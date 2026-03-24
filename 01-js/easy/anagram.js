@@ -13,9 +13,6 @@
 
 // solution
 
-
-
-
 function isAnagram(str1, str2) {
   // Step 1: Make both strings lowercase
   str1 = str1.toLowerCase();
