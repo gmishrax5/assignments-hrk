@@ -2,11 +2,12 @@ const express = require("express");
 const { UserModel, TodoModel } = require("./db");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const JWT_SECRET = "asdfghjkl";
+require("dotenv").config();
 
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // cluster credentials
-mongoose.connect("mongodb+srv://dummygm545:taklaverysmart@rtc.2h1juil.mongodb.net/todo-mishry-55")
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log("Connected to MongoDB successfully"))
     .catch((err) => console.error("Database connection error:", err.message));
 
@@ -31,8 +32,7 @@ app.post("/signup", async function(req, res) {
     
     
         
-    }
-});
+    });
 
 
 app.post("/signin",  async function(req, res) {
@@ -52,7 +52,7 @@ app.post("/signin",  async function(req, res) {
     if (user) {
         
         const token = jwt.sign({
-            id: user._id
+            id: user._id.toString(),
         }, JWT_SECRET);
 
         res.json({
@@ -69,13 +69,66 @@ app.post("/signin",  async function(req, res) {
 });
 
 
-app.post("/todo", function(req, res) {
+app.post("/todo", auth ,   function(req, res) {
+    const userId = req.useId;
+        res.json({
 
+    userId: userId,
+    });
 });
 
 
-app.get("/todos", function(req, res) {
-
+app.get("/todos", auth ,  function(req, res) {
+    const userId = req.useId;
+    res.json({
+        userId: userId,
+        });
 });
+
+//  auth middleware
+// function auth(req, res, next) {
+//     const authHeader = req.headers.authorization;
+//     const token = authHeader?.startsWith("Bearer ")
+//         ? authHeader.split(" ")[1]
+//         : req.headers.token;
+//     if (!token) {
+//         res.json({
+//             message: "Token is missing"
+//         })
+//         return;
+//     }
+
+//     try {
+//         const decodedData = jwt.verify(token, JWT_SECRET);
+//         if (decodedData.username) {
+//             req.username = decodedData.username
+//             next()
+//         } else {
+//             res.json({
+//                 message: "Invalid token"
+//             })
+//         }
+//     } catch (e) {
+//         res.json({
+//             message: "Invalid token"
+//         })
+//     }
+// }
+
+
+function auth(req, res, next) {
+    const authHeader = req.headers.token;
+    const decodedData = jwt.verify(token, JWT_SECRET);
+    if (decodedData) {
+        req.userId = decodedData.id
+        next();
+    } else {
+        res.status(403).json({
+            message: "Invalid token"
+        });
+    }
+    } 
+
+
 
 app.listen(3000);
