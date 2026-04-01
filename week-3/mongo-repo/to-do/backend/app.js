@@ -71,17 +71,27 @@ app.post("/signin",  async function(req, res) {
 
 app.post("/todo", auth ,   function(req, res) {
     const userId = req.useId;
-        res.json({
+        const tittle = req.body.title;
 
-    userId: userId,
+        TodoModel.create({
+            tittle,
+            userId
+        })
+
+    res.json({
+        userId: userId,
     });
 });
 
 
 app.get("/todos", auth ,  function(req, res) {
     const userId = req.useId;
-    res.json({
-        userId: userId,
+
+    const todos = await TodoModel.find({
+        userId: userId
+    })
+    res.json( {
+        todos: todos
         });
 });
 
